@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 
 #include "game_level.h"
+#include "power_up.h"
 
 // Represents the current state of the game
 enum GameState {
@@ -13,10 +14,24 @@ enum GameState {
     GAME_WIN
 };
 
+// Represents the four possible (collision) directions
+enum Direction {
+    UP,
+    RIGHT,
+    DOWN,
+    LEFT
+};
+// Defines a Collision typedef that represents collision data
+typedef std::tuple<bool, Direction, glm::vec2> Collision; // <collision?, what direction?, difference vector center - closest point>
+
 // Initial size of the player paddle
-const glm::vec2 PLAYER_SIZE(100.0f, 20.0f);
+const glm::vec2 PLAYER_SIZE(150.0f, 20.0f);
 // Initial velocity of the player paddle
 const float PLAYER_VELOCITY(500.0f);
+// Initial velocity of the Ball
+const glm::vec2 INITIAL_BALL_VELOCITY(100.0f, -350.0f);
+// Radius of the ball object
+const float BALL_RADIUS = 40.0f;
 
 // Game holds all game-related state and functionality.
 // Combines all game-related data into a single class for
@@ -28,8 +43,9 @@ public:
     GameState State;
     bool Keys[1024];
     unsigned int Width, Height;
-    std::vector<GameLevel>  Levels;
-    unsigned int            Level;
+    std::vector<GameLevel> Levels;
+    std::vector<PowerUp> PowerUps;
+    unsigned int Level;
     // constructor/destructor
     Game(unsigned int width, unsigned int height);
     ~Game();
@@ -39,6 +55,13 @@ public:
     void processInput(float dt);
     void update(float dt);
     void render();
+    void doCollisions();
+    // reset
+    void resetLevel();
+    void resetPlayer();
+    // powerups
+    void spawnPowerUps(GameObject& block);
+    void updatePowerUps(float dt);
 };
 
 #endif
