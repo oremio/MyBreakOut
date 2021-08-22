@@ -13,6 +13,12 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="资源文件\levels">
+      <UniqueIdentifier>{cfac953e-94dc-4a1a-81e4-1381316411f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\shaders">
+      <UniqueIdentifier>{d7c8ff6e-026f-4fa4-87fc-7593f2a49585}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\shader.h">
@@ -46,6 +52,9 @@
       <Filter>源文件</Filter>
     </ClInclude>
     <ClInclude Include="src\power_up.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\text_renderer.h">
       <Filter>源文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -89,25 +98,49 @@
     <ClCompile Include="src\post_processor.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\text_renderer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\shaders\sprite.fs">
-      <Filter>资源文件</Filter>
+    <None Include="resources\levels\four.lvl">
+      <Filter>资源文件\levels</Filter>
+    </None>
+    <None Include="resources\levels\one.lvl">
+      <Filter>资源文件\levels</Filter>
+    </None>
+    <None Include="resources\levels\two.lvl">
+      <Filter>资源文件\levels</Filter>
+    </None>
+    <None Include="resources\levels\three.lvl">
+      <Filter>资源文件\levels</Filter>
+    </None>
+    <None Include="src\shaders\text_2d.vs">
+      <Filter>源文件\shaders</Filter>
+    </None>
+    <None Include="src\shaders\text_2d.fs">
+      <Filter>源文件\shaders</Filter>
     </None>
     <None Include="src\shaders\sprite.vs">
-      <Filter>资源文件</Filter>
+      <Filter>源文件\shaders</Filter>
     </None>
-    <None Include="src\shaders\particle.fs">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="src\shaders\particle.vs">
-      <Filter>资源文件</Filter>
+    <None Include="src\shaders\sprite.fs">
+      <Filter>源文件\shaders</Filter>
     </None>
     <None Include="src\shaders\post_processing.vs">
-      <Filter>资源文件</Filter>
+      <Filter>源文件\shaders</Filter>
     </None>
     <None Include="src\shaders\post_processing.fs">
-      <Filter>资源文件</Filter>
+      <Filter>源文件\shaders</Filter>
+    </None>
+    <None Include="src\shaders\particle.vs">
+      <Filter>源文件\shaders</Filter>
+    </None>
+    <None Include="src\shaders\particle.fs">
+      <Filter>源文件\shaders</Filter>
+    </None>
+    <None Include="resources\levels\five.lvl">
+      <Filter>资源文件\levels</Filter>
     </None>
   </ItemGroup>
 </Project>

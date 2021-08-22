@@ -37,7 +37,7 @@ void GameLevel::draw(SpriteRenderer& renderer)
 bool GameLevel::isCompleted()
 {
     for (GameObject& tile : this->Bricks)
-        if (!tile.IsSolid && !tile.Destroyed) //不是坚硬的，却没有被破坏
+        if (!tile.IsSolid && !tile.Destroyed) //不是坚硬的，却没有被破坏，说明 还有剩
             return false;
     return true;
 }

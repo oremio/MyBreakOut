@@ -27,11 +27,11 @@ typedef std::tuple<bool, Direction, glm::vec2> Collision; // <collision?, what d
 // Initial size of the player paddle
 const glm::vec2 PLAYER_SIZE(150.0f, 20.0f);
 // Initial velocity of the player paddle
-const float PLAYER_VELOCITY(500.0f);
+const float PLAYER_VELOCITY(1000.0f);
 // Initial velocity of the Ball
 const glm::vec2 INITIAL_BALL_VELOCITY(100.0f, -350.0f);
 // Radius of the ball object
-const float BALL_RADIUS = 40.0f;
+const float BALL_RADIUS = 35.0f;
 
 // Game holds all game-related state and functionality.
 // Combines all game-related data into a single class for
@@ -42,10 +42,12 @@ public:
     // game state
     GameState State;
     bool Keys[1024];
+    bool KeysProcessed[1024];
     unsigned int Width, Height;
     std::vector<GameLevel> Levels;
     std::vector<PowerUp> PowerUps;
     unsigned int Level;
+    unsigned int Lives;
     // constructor/destructor
     Game(unsigned int width, unsigned int height);
     ~Game();

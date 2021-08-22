@@ -30,6 +30,7 @@
     <ClInclude Include="src\shader.h" />
     <ClInclude Include="src\sprite_renderer.h" />
     <ClInclude Include="src\texture.h" />
+    <ClInclude Include="src\text_renderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ball_object.cpp" />
@@ -45,14 +46,22 @@
     <ClCompile Include="src\sprite_renderer.cpp" />
     <ClCompile Include="src\stb_image.cpp" />
     <ClCompile Include="src\texture.cpp" />
+    <ClCompile Include="src\text_renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="resources\levels\five.lvl" />
+    <None Include="resources\levels\four.lvl" />
+    <None Include="resources\levels\one.lvl" />
+    <None Include="resources\levels\three.lvl" />
+    <None Include="resources\levels\two.lvl" />
     <None Include="src\shaders\particle.fs" />
     <None Include="src\shaders\particle.vs" />
     <None Include="src\shaders\post_processing.fs" />
     <None Include="src\shaders\post_processing.vs" />
     <None Include="src\shaders\sprite.fs" />
     <None Include="src\shaders\sprite.vs" />
+    <None Include="src\shaders\text_2d.fs" />
+    <None Include="src\shaders\text_2d.vs" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

@@ -1,4 +1,6 @@
 #include <algorithm>
+#include <sstream>
+#include <iostream>
 
 #include <irrklang/irrKlang.h>
 using namespace irrklang;
@@ -10,6 +12,7 @@ using namespace irrklang;
 #include "ball_object.h"
 #include "particle_generator.h"
 #include "post_processor.h"
+#include "text_renderer.h"
 
 // Game-related State data
 SpriteRenderer* Renderer;
@@ -18,11 +21,12 @@ BallObject* Ball;
 ParticleGenerator* Particles;
 PostProcessor* Effects;
 ISoundEngine* SoundEngine = createIrrKlangDevice();
+TextRenderer* Text;
 
 float ShakeTime = 0.0f;
 
 Game::Game(unsigned int width, unsigned int height)
-    : State(GAME_ACTIVE), Keys(), Width(width), Height(height)
+    : State(GAME_MENU), Keys(), KeysProcessed(), Width(width), Height(height), Level(0), Lives(3)
 {
 
 }
@@ -34,9 +38,11 @@ Game::~Game()
     delete Ball;
     delete Particles;
     delete Effects;
+    delete Text;
     SoundEngine->drop();
 }
 
+// 初始化
 void Game::init()
 {
     // load shaders
@@ -67,15 +73,19 @@ void Game::init()
     Renderer = new SpriteRenderer(ResourceManager::getShader("sprite"));
     Particles = new ParticleGenerator(ResourceManager::getShader("particle"), ResourceManager::getTexture("particle"), 500);
     Effects = new PostProcessor(ResourceManager::getShader("postprocessing"), this->Width, this->Height);
+    Text = new TextRenderer(this->Width, this->Height);
+    Text->load("resources/fonts/OCRAEXT.TTF", 24);
     // load levels
     GameLevel one; one.load("resources/levels/one.lvl", this->Width, this->Height / 2);
     GameLevel two; two.load("resources/levels/two.lvl", this->Width, this->Height / 2);
     GameLevel three; three.load("resources/levels/three.lvl", this->Width, this->Height / 2);
     GameLevel four; four.load("resources/levels/four.lvl", this->Width, this->Height / 2);
+    GameLevel five; five.load("resources/levels/five.lvl", this->Width, this->Height / 2);
     this->Levels.push_back(one);
     this->Levels.push_back(two);
     this->Levels.push_back(three);
     this->Levels.push_back(four);
+    this->Levels.push_back(five);
     this->Level = 0;
     // configure game objects
     glm::vec2 playerPos = glm::vec2(this->Width / 2.0f - PLAYER_SIZE.x / 2.0f, this->Height - PLAYER_SIZE.y);
@@ -86,6 +96,7 @@ void Game::init()
     SoundEngine->play2D("resources/audio/future_like_wind.mp3", true);
 }
 
+// 每帧更新
 void Game::update(float dt)
 {
     // update objects
@@ -106,13 +117,59 @@ void Game::update(float dt)
     // check loss condition
     if (Ball->Position.y >= this->Height) // did ball reach bottom edge?
     {
+        --this->Lives;
+        // did the player lose all his lives? : game over
+        if (this->Lives == 0)
+        {
+            this->resetLevel();
+            this->State = GAME_MENU;
+        }
+        this->resetPlayer();
+    }
+    // check win condition
+    if (this->State == GAME_ACTIVE && this->Levels[this->Level].isCompleted())
+    {
         this->resetLevel();
         this->resetPlayer();
+        Effects->Chaos = true;
+        this->State = GAME_WIN;
     }
 }
 
+// 键盘输入
 void Game::processInput(float dt)
 {
+    if (this->State == GAME_MENU)
+    {
+        if (this->Keys[GLFW_KEY_ENTER] && !this->KeysProcessed[GLFW_KEY_ENTER])
+        {
+            this->State = GAME_ACTIVE;
+            this->KeysProcessed[GLFW_KEY_ENTER] = true;
+        }
+        if (this->Keys[GLFW_KEY_W] && !this->KeysProcessed[GLFW_KEY_W])
+        {
+            this->Level = (this->Level + 1) % 5;
+            this->KeysProcessed[GLFW_KEY_W] = true;
+        }
+        if (this->Keys[GLFW_KEY_S] && !this->KeysProcessed[GLFW_KEY_S])
+        {
+            if (this->Level > 0)
+                --this->Level;
+            else
+                this->Level = 4;
+            //this->Level = (this->Level - 1) % 4;
+            this->KeysProcessed[GLFW_KEY_S] = true;
+        }
+    }
+    if (this->State == GAME_WIN)
+    {
+        if (this->Keys[GLFW_KEY_ENTER])
+        {
+            this->KeysProcessed[GLFW_KEY_ENTER] = true;
+            Effects->Chaos = false;
+            this->State = GAME_MENU;
+        }
+    }
     if (this->State == GAME_ACTIVE)
     {
         GLfloat velocity = PLAYER_VELOCITY * dt;
@@ -140,9 +197,10 @@ void Game::processInput(float dt)
     }
 }
 
+// 渲染
 void Game::render()
 {
-    if (this->State == GAME_ACTIVE)
+    if (this->State == GAME_ACTIVE || this->State == GAME_MENU || this->State == GAME_WIN)
     {
         // begin rendering to postprocessing framebuffer
         Effects->beginRender();
@@ -164,9 +222,23 @@ void Game::render()
         Effects->endRender();
         // render postprocessing quad
         Effects->render(glfwGetTime());
+        // render text (don't include in postprocessing)
+        std::stringstream ss; ss << this->Lives;
+        Text->renderText("Lives:" + ss.str(), 5.0f, 5.0f, 1.0f);
+    }
+    if (this->State == GAME_MENU)
+    {
+        Text->renderText("Press ENTER to start", 490.0f, Height / 2 + 20.0f, 1.0f);
+        Text->renderText("Press W or S to select level", 485.0f, Height / 2 + 40.0f, 0.75f);
+    }
+    if (this->State == GAME_WIN)
+    {
+        Text->renderText("You WON!!!", 560.0f, this->Height / 2.0f - 30.0f, 1.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+        Text->renderText("Press ENTER to retry or ESC to quit", 370.0f, this->Height / 2.0f, 1.0f, glm::vec3(1.0f, 1.0f, 0.0f));
     }
 }
 
+// 游戏失败
 void Game::resetLevel()
 {
     if (this->Level == 0)
@@ -177,6 +249,7 @@ void Game::resetLevel()
         this->Levels[2].load("resources/levels/three.lvl", this->Width, this->Height / 2);
     else if (this->Level == 3)
         this->Levels[3].load("resources/levels/four.lvl", this->Width, this->Height / 2);
+    this->Lives = 3;
 }
 
 void Game::resetPlayer()
@@ -185,11 +258,16 @@ void Game::resetPlayer()
     Player->Size = PLAYER_SIZE;
     Player->Position = glm::vec2(this->Width / 2.0f - PLAYER_SIZE.x / 2.0f, this->Height - PLAYER_SIZE.y);
     Ball->reset(Player->Position + glm::vec2(PLAYER_SIZE.x / 2.0f - BALL_RADIUS, -(BALL_RADIUS * 2.0f)), INITIAL_BALL_VELOCITY);
+    // also disable all active powerups
+    Effects->Chaos = Effects->Confuse = false;
+    Ball->PassThrough = Ball->Sticky = false;
+    Player->Color = glm::vec3(1.0f);
+    Ball->Color = glm::vec3(1.0f);
 }
 
-// powerups
 bool isOtherPowerUpActive(std::vector<PowerUp>& powerUps, std::string type);
 
+// 更新道具
 void Game::updatePowerUps(float dt)
 {
     for (PowerUp& powerUp : this->PowerUps)
@@ -199,7 +277,7 @@ void Game::updatePowerUps(float dt)
         {
             powerUp.Duration -= dt;
 
-            if (powerUp.Duration <= 0.0f)
+            if (powerUp.Duration <= 0.0f) // 不更新speed和increase
             {
                 // remove powerup from list (will later be removed)
                 powerUp.Activated = false;
@@ -250,6 +328,7 @@ bool shouldSpawn(unsigned int chance)
     return random == 0;
 }
 
+// 道具随机掉落
 void Game::spawnPowerUps(GameObject& block)
 {
     if (shouldSpawn(75)) // 1 in 75 chance
@@ -266,6 +345,7 @@ void Game::spawnPowerUps(GameObject& block)
         this->PowerUps.push_back(PowerUp("chaos", glm::vec3(0.9f, 0.25f, 0.25f), 7.5f, block.Position, ResourceManager::getTexture("powerup_chaos")));
 }
 
+// 道具具体作用
 void activatePowerUp(PowerUp& powerUp)
 {
     if (powerUp.Type == "speed")
@@ -298,6 +378,7 @@ void activatePowerUp(PowerUp& powerUp)
     }
 }
 
+// 检测是否吃了多次同种道具
 bool isOtherPowerUpActive(std::vector<PowerUp>& powerUps, std::string type)
 {
     // Check if another PowerUp of the same type is still active
@@ -316,6 +397,7 @@ bool checkCollision(GameObject& one, GameObject& two);
 Collision checkCollision(BallObject& one, GameObject& two);
 Direction vectorDirection(glm::vec2 closest);
 
+// 碰撞
 void Game::doCollisions()
 {
     for (GameObject& box : this->Levels[this->Level].Bricks)
@@ -409,6 +491,7 @@ void Game::doCollisions()
     }
 }
 
+// 碰撞检测
 bool checkCollision(GameObject& one, GameObject& two) // AABB - AABB collision
 {
     // collision x-axis?
@@ -421,6 +504,7 @@ bool checkCollision(GameObject& one, GameObject& two) // AABB - AABB collision
     return collisionX && collisionY;
 }
 
+// 球重载
 Collision checkCollision(BallObject& one, GameObject& two) // AABB - Circle collision
 {
     // get center point circle first
