@@ -17,3 +17,7 @@
 ![](https://files.catbox.moe/asnzsn.png)
 
 ![](https://files.catbox.moe/460lc4.png)
+
+如果想要调试源码，我的开发环境：
+
+Windows 10 家庭中文版 19043.1165 + Microsoft Visual Studio Community 2019 版本 16.5.4
